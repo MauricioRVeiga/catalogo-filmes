@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Catálogo de Filmes
 
 Projeto full stack com Flask, Flet e landing page estática.
@@ -18,3 +19,5 @@ flet run main.py
 
 ### Landing page
 Abra o arquivo `landing/index.html` no navegador.
+=======
+# catalogo-filmes
