@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Catálogo de Filmes
 
 Projeto full stack com Flask, Flet e landing page estática.
