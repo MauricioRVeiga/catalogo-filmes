@@ -7,36 +7,222 @@
   <title>Catálogo de Filmes</title>
 </head>
 <body class="bg-slate-950 text-white min-h-screen">
-  <main class="max-w-4xl mx-auto px-6 py-16">
-    <section class="bg-slate-900 rounded-2xl p-10 shadow-xl border border-slate-800">
-      <h1 class="text-4xl font-bold mb-4">Catálogo de Filmes</h1>
-      <p class="text-lg text-slate-300 mb-8">
-        Aplicação full stack com Flask, Flet e landing page estática.
-        O projeto exibe filmes, cadastra novos registros e documenta a API com Swagger.
+
+  <!-- Navbar -->
+  <header class="border-b border-slate-800">
+    <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-2 font-bold text-lg tracking-tight">
+        <span>🎬</span>
+        <span>Catálogo de Filmes</span>
+      </div>
+      <nav class="hidden md:flex gap-6 text-sm text-slate-400">
+        <a href="#sobre" class="hover:text-white transition-colors">Sobre</a>
+        <a href="#como-rodar" class="hover:text-white transition-colors">Como rodar</a>
+        <a href="#endpoints" class="hover:text-white transition-colors">API</a>
+        <a href="#tecnologias" class="hover:text-white transition-colors">Tecnologias</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-6 py-16 space-y-24">
+
+    <!-- Hero -->
+    <section id="sobre" class="text-center space-y-6">
+      <div class="inline-flex items-center gap-2 bg-blue-900/40 border border-blue-700/50 text-blue-300 text-sm px-4 py-1.5 rounded-full">
+        <span class="w-2 h-2 bg-blue-400 rounded-full inline-block animate-pulse"></span>
+        Projeto Full Stack — Flask + Flet
+      </div>
+
+      <h1 class="text-5xl font-extrabold tracking-tight leading-tight">
+        Catálogo de<br/>
+        <span class="text-blue-400">Filmes</span>
+      </h1>
+
+      <p class="text-slate-400 text-lg max-w-xl mx-auto leading-relaxed">
+        Aplicação full stack para gerenciar um acervo de filmes favoritos.
+        Backend REST com Flask, interface desktop com Flet e
+        documentação automática via Swagger UI.
       </p>
 
-      <div class="grid md:grid-cols-2 gap-6">
-        <div class="bg-slate-800 rounded-xl p-6">
-          <h2 class="text-2xl font-semibold mb-3">Como executar</h2>
-          <ol class="list-decimal ml-5 space-y-2 text-slate-300">
-            <li>Instale as dependências do backend e frontend.</li>
-            <li>Rode o Flask para expor a API.</li>
-            <li>Rode o Flet para abrir a interface.</li>
-            <li>Acesse o Swagger em <code>/api/docs</code>.</li>
-          </ol>
+      <div class="flex flex-wrap justify-center gap-3 text-sm">
+        <span class="bg-slate-800 border border-slate-700 px-3 py-1 rounded-full">Flask + Flask-RESTX</span>
+        <span class="bg-slate-800 border border-slate-700 px-3 py-1 rounded-full">Flet</span>
+        <span class="bg-slate-800 border border-slate-700 px-3 py-1 rounded-full">Pydantic</span>
+        <span class="bg-slate-800 border border-slate-700 px-3 py-1 rounded-full">Swagger UI</span>
+        <span class="bg-slate-800 border border-slate-700 px-3 py-1 rounded-full">Tailwind CSS</span>
+      </div>
+    </section>
+
+    <!-- Como rodar -->
+    <section id="como-rodar" class="space-y-8">
+      <div>
+        <h2 class="text-3xl font-bold">Como executar</h2>
+        <p class="text-slate-400 mt-2">Siga os passos abaixo para rodar o projeto localmente.</p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-5">
+
+        <!-- Passo 1 -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-sm font-bold shrink-0">1</span>
+            <h3 class="font-semibold text-base">Instalar dependências</h3>
+          </div>
+          <p class="text-slate-400 text-sm">Crie um ambiente virtual e instale os pacotes.</p>
+          <pre class="bg-slate-950 border border-slate-700 rounded-lg p-4 text-xs text-green-400 overflow-x-auto leading-relaxed"><code>python -m venv .venv
+
+# Windows
+.venv\Scripts\activate
+
+# Linux / Mac
+source .venv/bin/activate
+
+pip install -r requirements.txt</code></pre>
         </div>
 
-        <div class="bg-slate-800 rounded-xl p-6">
-          <h2 class="text-2xl font-semibold mb-3">Recursos</h2>
-          <ul class="space-y-2 text-slate-300">
-            <li>Backend com Blueprints.</li>
-            <li>2 endpoints GET documentados.</li>
-            <li>1 endpoint POST com Pydantic.</li>
-            <li>Frontend consumindo a API.</li>
-          </ul>
+        <!-- Passo 2 -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-sm font-bold shrink-0">2</span>
+            <h3 class="font-semibold text-base">Iniciar o Backend</h3>
+          </div>
+          <p class="text-slate-400 text-sm">Suba o servidor Flask na porta 5000.</p>
+          <pre class="bg-slate-950 border border-slate-700 rounded-lg p-4 text-xs text-green-400 overflow-x-auto leading-relaxed"><code>cd backend
+python app.py
+
+# API em:
+# http://127.0.0.1:5000/api
+
+# Swagger em:
+# http://127.0.0.1:5000/api/docs</code></pre>
+        </div>
+
+        <!-- Passo 3 -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-sm font-bold shrink-0">3</span>
+            <h3 class="font-semibold text-base">Iniciar o Frontend</h3>
+          </div>
+          <p class="text-slate-400 text-sm">Abra a interface desktop com Flet em outro terminal.</p>
+          <pre class="bg-slate-950 border border-slate-700 rounded-lg p-4 text-xs text-green-400 overflow-x-auto leading-relaxed"><code>cd frontend
+flet run main.py
+
+# A janela desktop abre
+# automaticamente conectada
+# ao backend Flask</code></pre>
+        </div>
+
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 flex items-start gap-4">
+        <span class="text-xl shrink-0 mt-0.5">📄</span>
+        <div>
+          <h3 class="font-semibold mb-1">Landing Page</h3>
+          <p class="text-slate-400 text-sm">
+            Abra o arquivo
+            <code class="bg-slate-800 text-white px-1.5 py-0.5 rounded text-xs">landing/index.html</code>
+            diretamente no navegador — não requer servidor.
+          </p>
         </div>
       </div>
     </section>
+
+    <!-- Endpoints -->
+    <section id="endpoints" class="space-y-8">
+      <div>
+        <h2 class="text-3xl font-bold">Endpoints da API</h2>
+        <p class="text-slate-400 mt-2">
+          Documentação interativa disponível em
+          <code class="bg-slate-800 text-white px-1.5 py-0.5 rounded text-sm">/api/docs</code>
+          (Swagger UI).
+        </p>
+      </div>
+
+      <div class="space-y-3">
+
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 flex items-start gap-4">
+          <span class="bg-emerald-900/50 text-emerald-400 border border-emerald-700/50 text-xs font-bold px-2.5 py-1 rounded mt-0.5 shrink-0">GET</span>
+          <div>
+            <p class="font-mono font-semibold">/api/movies</p>
+            <p class="text-slate-400 text-sm mt-1">Lista todos os filmes cadastrados no catálogo. Retorna 200 com array de filmes.</p>
+          </div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 flex items-start gap-4">
+          <span class="bg-emerald-900/50 text-emerald-400 border border-emerald-700/50 text-xs font-bold px-2.5 py-1 rounded mt-0.5 shrink-0">GET</span>
+          <div>
+            <p class="font-mono font-semibold">
+              /api/movies/<span class="text-blue-400">{id}</span>
+            </p>
+            <p class="text-slate-400 text-sm mt-1">Retorna um filme pelo ID. Retorna 200 se encontrado ou 404 caso contrário.</p>
+          </div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 flex items-start gap-4">
+          <span class="bg-blue-900/50 text-blue-400 border border-blue-700/50 text-xs font-bold px-2.5 py-1 rounded mt-0.5 shrink-0">POST</span>
+          <div>
+            <p class="font-mono font-semibold">/api/movies</p>
+            <p class="text-slate-400 text-sm mt-1">
+              Cadastra um novo filme. Valida os dados com Pydantic antes de persistir.
+              Retorna 201 em caso de sucesso ou 400 com detalhes dos erros.
+            </p>
+            <div class="mt-3 flex flex-wrap gap-2">
+              <span class="bg-slate-800 text-slate-300 text-xs px-2 py-1 rounded"><code>title</code> · string 1–100</span>
+              <span class="bg-slate-800 text-slate-300 text-xs px-2 py-1 rounded"><code>genre</code> · string 1–60</span>
+              <span class="bg-slate-800 text-slate-300 text-xs px-2 py-1 rounded"><code>year</code> · int 1888–2100</span>
+              <span class="bg-slate-800 text-slate-300 text-xs px-2 py-1 rounded"><code>rating</code> · float 0–10</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Tecnologias -->
+    <section id="tecnologias" class="space-y-8">
+      <div>
+        <h2 class="text-3xl font-bold">Tecnologias</h2>
+        <p class="text-slate-400 mt-2">Stack utilizada em cada camada do projeto.</p>
+      </div>
+
+      <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-4">
+
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-3 text-center">
+          <div class="text-4xl">🐍</div>
+          <h3 class="font-semibold">Flask</h3>
+          <p class="text-slate-400 text-sm">Backend REST organizado com Blueprints e Flask-RESTX</p>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-3 text-center">
+          <div class="text-4xl">🖥️</div>
+          <h3 class="font-semibold">Flet</h3>
+          <p class="text-slate-400 text-sm">Interface desktop multiplataforma escrita em Python</p>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-3 text-center">
+          <div class="text-4xl">✅</div>
+          <h3 class="font-semibold">Pydantic</h3>
+          <p class="text-slate-400 text-sm">Validação de dados tipada no endpoint POST</p>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-3 text-center">
+          <div class="text-4xl">📖</div>
+          <h3 class="font-semibold">Swagger UI</h3>
+          <p class="text-slate-400 text-sm">Documentação automática e interativa dos endpoints</p>
+        </div>
+
+      </div>
+    </section>
+
   </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800 mt-16">
+    <div class="max-w-5xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-slate-500 text-sm">
+      <span>🎬 Catálogo de Filmes — Projeto Full Stack com Flask e Flet</span>
+      <span>LDW · 2025</span>
+    </div>
+  </footer>
+
 </body>
 </html>
