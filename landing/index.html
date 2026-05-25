@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Catálogo de Filmes</title>
+</head>
+<body class="bg-slate-950 text-white min-h-screen">
+  <main class="max-w-4xl mx-auto px-6 py-16">
+    <section class="bg-slate-900 rounded-2xl p-10 shadow-xl border border-slate-800">
+      <h1 class="text-4xl font-bold mb-4">Catálogo de Filmes</h1>
+      <p class="text-lg text-slate-300 mb-8">
+        Aplicação full stack com Flask, Flet e landing page estática.
+        O projeto exibe filmes, cadastra novos registros e documenta a API com Swagger.
+      </p>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-slate-800 rounded-xl p-6">
+          <h2 class="text-2xl font-semibold mb-3">Como executar</h2>
+          <ol class="list-decimal ml-5 space-y-2 text-slate-300">
+            <li>Instale as dependências do backend e frontend.</li>
+            <li>Rode o Flask para expor a API.</li>
+            <li>Rode o Flet para abrir a interface.</li>
+            <li>Acesse o Swagger em <code>/api/docs</code>.</li>
+          </ol>
+        </div>
+
+        <div class="bg-slate-800 rounded-xl p-6">
+          <h2 class="text-2xl font-semibold mb-3">Recursos</h2>
+          <ul class="space-y-2 text-slate-300">
+            <li>Backend com Blueprints.</li>
+            <li>2 endpoints GET documentados.</li>
+            <li>1 endpoint POST com Pydantic.</li>
+            <li>Frontend consumindo a API.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
