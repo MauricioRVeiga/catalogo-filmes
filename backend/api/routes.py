@@ -2,10 +2,10 @@ from flask import Blueprint, request
 from flask_restx import Api, Resource, fields
 from pydantic import ValidationError
 
-try:
-    from backend.data import movies
-    from backend.api.schemas import MovieCreate
-except ModuleNotFoundError:
+if __package__ == "backend.api":
+    from ..data import movies
+    from .schemas import MovieCreate
+else:
     from data import movies
     from api.schemas import MovieCreate
 

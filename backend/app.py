@@ -1,8 +1,8 @@
 from flask import Flask
 
-try:
-    from backend.api.routes import api_bp
-except ModuleNotFoundError:
+if __package__ == "backend":
+    from .api.routes import api_bp
+else:
     from api.routes import api_bp
 
 

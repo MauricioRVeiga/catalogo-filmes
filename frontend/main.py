@@ -5,6 +5,14 @@ API_URL = "http://127.0.0.1:5000/api"
 REQUEST_TIMEOUT = 10
 
 
+def make_border(color: str, width: int = 1) -> ft.border.Border:
+    return ft.border.Border.all(width=width, color=color)
+
+
+def make_padding(horizontal: int = 0, vertical: int = 0) -> ft.padding.Padding:
+    return ft.padding.Padding.symmetric(horizontal=horizontal, vertical=vertical)
+
+
 def make_field(label: str, keyboard_type=None) -> ft.TextField:
     return ft.TextField(
         label=label,
@@ -85,7 +93,7 @@ def main(page: ft.Page):
         feedback_text.value = message
         feedback_text.color = "#d1fae5" if success else "#fee2e2"
         feedback_box.bgcolor = "#14532d" if success else "#7f1d1d"
-        feedback_box.border = ft.border.all(1, "#22c55e" if success else "#ef4444")
+        feedback_box.border = make_border("#22c55e" if success else "#ef4444")
         feedback_box.visible = True
         page.update()
 
@@ -106,7 +114,7 @@ def main(page: ft.Page):
             padding=16,
             border_radius=18,
             bgcolor="#111827",
-            border=ft.border.all(1, "#1f2937"),
+            border=make_border("#1f2937"),
             content=ft.Row(
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                 vertical_alignment=ft.CrossAxisAlignment.START,
@@ -119,7 +127,7 @@ def main(page: ft.Page):
                                 height=42,
                                 border_radius=12,
                                 bgcolor="#1d4ed8",
-                                alignment=ft.alignment.center,
+                                alignment=ft.alignment.Alignment.CENTER,
                                 content=ft.Text("🎬", size=18),
                             ),
                             ft.Column(
@@ -141,7 +149,7 @@ def main(page: ft.Page):
                         ],
                     ),
                     ft.Container(
-                        padding=ft.padding.symmetric(horizontal=12, vertical=8),
+                        padding=make_padding(horizontal=12, vertical=8),
                         border_radius=999,
                         bgcolor="#3f2b05",
                         content=ft.Text(
@@ -173,7 +181,7 @@ def main(page: ft.Page):
                         padding=20,
                         border_radius=16,
                         bgcolor="#111827",
-                        border=ft.border.all(1, "#1f2937"),
+                        border=make_border("#1f2937"),
                         content=ft.Text(
                             "Nenhum filme cadastrado ainda. Use o formulário para criar o primeiro item.",
                             color=ft.Colors.BLUE_GREY_200,
@@ -242,14 +250,14 @@ def main(page: ft.Page):
         padding=24,
         border_radius=24,
         bgcolor="#111827",
-        border=ft.border.all(1, "#1f2937"),
+        border=make_border("#1f2937"),
         content=ft.Column(
             spacing=10,
             controls=[
                 ft.Row(
                     controls=[
                         ft.Container(
-                            padding=ft.padding.symmetric(horizontal=12, vertical=6),
+                            padding=make_padding(horizontal=12, vertical=6),
                             border_radius=999,
                             bgcolor="#172554",
                             content=ft.Text(
@@ -280,7 +288,7 @@ def main(page: ft.Page):
         padding=22,
         border_radius=24,
         bgcolor="#0f172a",
-        border=ft.border.all(1, "#1e293b"),
+        border=make_border("#1e293b"),
         content=ft.Column(
             spacing=18,
             controls=[
@@ -312,7 +320,7 @@ def main(page: ft.Page):
         padding=22,
         border_radius=24,
         bgcolor="#0f172a",
-        border=ft.border.all(1, "#1e293b"),
+        border=make_border("#1e293b"),
         content=ft.Column(
             spacing=16,
             controls=[
