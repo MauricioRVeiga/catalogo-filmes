@@ -1,8 +1,13 @@
 from flask import Blueprint, request
 from flask_restx import Api, Resource, fields
 from pydantic import ValidationError
-from data import movies
-from api.schemas import MovieCreate
+
+try:
+    from backend.data import movies
+    from backend.api.schemas import MovieCreate
+except ModuleNotFoundError:
+    from data import movies
+    from api.schemas import MovieCreate
 
 api_bp = Blueprint("api", __name__, url_prefix="/api")
 api = Api(
@@ -36,6 +41,11 @@ error_model = api.model("Error", {
 })
 
 
+def get_json_payload():
+    payload = request.get_json(silent=True)
+    return payload if isinstance(payload, dict) else None
+
+
 @api.route("/movies")
 class MovieList(Resource):
     @api.doc("listar_filmes")
@@ -64,8 +74,11 @@ class MovieList(Resource):
 
         Retorna 400 com detalhes dos erros caso a validação falhe.
         """
+        payload = get_json_payload()
+        if payload is None:
+            return {"error": "Envie um corpo JSON válido."}, 400
+
         try:
-            payload = request.get_json(force=True)
             movie = MovieCreate(**payload)
         except ValidationError as e:
             return {"error": e.errors()}, 400
@@ -79,7 +92,6 @@ class MovieList(Resource):
 @api.param("movie_id", "Identificador único do filme")
 class MovieDetail(Resource):
     @api.doc("detalhar_filme")
-    @api.marshal_with(movie_model)
     @api.response(200, "Filme encontrado com sucesso", movie_model)
     @api.response(404, "Filme não encontrado", error_model)
     def get(self, movie_id):

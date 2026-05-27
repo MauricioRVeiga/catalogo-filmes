@@ -1,741 +1,318 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- SEO -->
-  <meta name="description" content="Catálogo de Filmes — aplicação full stack com Flask, Flet e Pydantic. API REST com Swagger UI integrado." />
-  <meta property="og:title" content="Catálogo de Filmes" />
-  <meta property="og:description" content="Aplicação full stack para gerenciar um acervo de filmes. Backend REST com Flask, interface desktop com Flet e documentação automática via Swagger UI." />
-  <meta property="og:type" content="website" />
-  <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Catálogo de Filmes" />
-  <meta name="twitter:description" content="Aplicação full stack com Flask, Flet e Pydantic." />
-
-  <!-- Favicon emoji -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>" />
-
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta
+    name="description"
+    content="Catálogo de Filmes: aplicação full stack com backend Flask, frontend Flet e landing page em Tailwind CSS."
+  >
   <title>Catálogo de Filmes</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background:
+        radial-gradient(circle at top, rgba(245, 158, 11, 0.18), transparent 28%),
+        radial-gradient(circle at right, rgba(34, 211, 238, 0.14), transparent 24%),
+        #020617;
+    }
+
     .glass {
-      background: rgba(255, 255, 255, 0.03);
+      background: rgba(15, 23, 42, 0.72);
       backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.07);
-    }
-    .gradient-text {
-      background: linear-gradient(135deg, #a855f7, #3b82f6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .fade-in {
-      opacity: 0;
-      transform: translateY(28px);
-      transition: opacity 0.65s ease, transform 0.65s ease;
-    }
-    .fade-in.visible { opacity: 1; transform: translateY(0); }
-
-    /* Scroll offset for fixed navbar */
-    section[id] { scroll-margin-top: 84px; }
-
-    /* Nav active link */
-    #nav-desktop a.active { color: white; }
-
-    #mobile-menu { display: none; }
-    #mobile-menu.open { display: flex; }
-
-    .badge-get {
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.25);
-      color: #34d399;
-    }
-    .badge-post {
-      background: rgba(59, 130, 246, 0.1);
-      border: 1px solid rgba(59, 130, 246, 0.25);
-      color: #60a5fa;
-    }
-    .badge-err {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.25);
-      color: #f87171;
+      border: 1px solid rgba(148, 163, 184, 0.16);
     }
 
-    /* Scroll progress bar */
-    #scroll-bar {
-      position: fixed;
-      top: 0; left: 0;
-      height: 2px;
-      width: 0%;
-      background: linear-gradient(90deg, #a855f7, #3b82f6);
-      z-index: 100;
-      transition: width 80ms linear;
+    .code-block {
+      background: rgba(2, 6, 23, 0.88);
+      border: 1px solid rgba(148, 163, 184, 0.14);
     }
-
-    /* Copy button */
-    .code-block { position: relative; }
-    .copy-btn {
-      position: absolute;
-      top: 10px; right: 10px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.09);
-      color: #71717a;
-      border-radius: 6px;
-      padding: 3px 9px;
-      font-size: 11px;
-      cursor: pointer;
-      transition: color 0.15s, background 0.15s, border-color 0.15s;
-      font-family: ui-monospace, monospace;
-    }
-    .copy-btn:hover { color: white; background: rgba(255,255,255,0.1); }
-    .copy-btn.copied { color: #34d399; border-color: rgba(52,211,153,0.3); }
-
-    /* Toast */
-    #toast {
-      position: fixed;
-      bottom: 80px; right: 24px;
-      background: rgba(24,24,27,0.96);
-      border: 1px solid rgba(255,255,255,0.1);
-      backdrop-filter: blur(16px);
-      color: white;
-      padding: 11px 16px;
-      border-radius: 12px;
-      font-size: 13px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      z-index: 200;
-      transform: translateY(16px);
-      opacity: 0;
-      transition: transform 0.28s ease, opacity 0.28s ease;
-      pointer-events: none;
-    }
-    #toast.show { transform: translateY(0); opacity: 1; }
-
-    /* Back to top */
-    #back-top {
-      position: fixed;
-      bottom: 24px; right: 24px;
-      width: 40px; height: 40px;
-      background: rgba(168,85,247,0.12);
-      border: 1px solid rgba(168,85,247,0.22);
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      color: #a855f7;
-      cursor: pointer;
-      z-index: 90;
-      opacity: 0;
-      transform: translateY(8px);
-      transition: opacity 0.28s, transform 0.28s, background 0.2s;
-    }
-    #back-top.show { opacity: 1; transform: translateY(0); }
-    #back-top:hover { background: rgba(168,85,247,0.22); }
-
-    html { scroll-behavior: smooth; }
-    ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-track { background: #09090b; }
-    ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: #52525b; }
   </style>
 </head>
-<body class="bg-zinc-950 text-white min-h-screen overflow-x-hidden">
-
-  <!-- Scroll progress bar -->
-  <div id="scroll-bar"></div>
-
-  <!-- Background glow -->
-  <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[600px] bg-purple-600/10 rounded-full blur-[140px]"></div>
-    <div class="absolute top-1/3 right-0 w-[500px] h-[400px] bg-blue-600/8 rounded-full blur-[120px]"></div>
-    <div class="absolute bottom-1/4 left-0 w-[350px] h-[350px] bg-violet-600/6 rounded-full blur-[100px]"></div>
-  </div>
-
-  <!-- ── Navbar ─────────────────────────────────────────────────── -->
-  <header class="fixed top-0 left-0 right-0 z-50 border-b border-white/5 backdrop-blur-md bg-zinc-950/80">
-    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-
-      <a href="#" class="flex items-center gap-2.5 font-bold text-lg tracking-tight">
-        <span class="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-sm">🎬</span>
-        CatálogoFilmes
+<body class="text-slate-100">
+  <header class="sticky top-0 z-50 border-b border-white/10 bg-slate-950/80 backdrop-blur-xl">
+    <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+      <a href="#topo" class="flex items-center gap-3 text-sm font-semibold tracking-wide text-slate-100">
+        <span class="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-400/15 text-xl shadow-lg shadow-amber-500/10">🎬</span>
+        Catálogo de Filmes
       </a>
-
-      <nav id="nav-desktop" class="hidden md:flex items-center gap-7 text-sm text-zinc-400">
-        <a href="#features"    class="hover:text-white transition-colors">Features</a>
-        <a href="#preview"     class="hover:text-white transition-colors">Preview</a>
-        <a href="#como-rodar"  class="hover:text-white transition-colors">Instalação</a>
-        <a href="#endpoints"   class="hover:text-white transition-colors">API</a>
-        <a href="#tecnologias" class="hover:text-white transition-colors">Stack</a>
+      <nav class="hidden items-center gap-6 text-sm text-slate-300 md:flex">
+        <a href="#visao-geral" class="transition hover:text-white">Visão geral</a>
+        <a href="#requisitos" class="transition hover:text-white">Requisitos</a>
+        <a href="#endpoints" class="transition hover:text-white">API</a>
+        <a href="#execucao" class="transition hover:text-white">Execução</a>
       </nav>
-
-      <div class="flex items-center gap-3">
-        <a href="https://github.com/MauricioRVeiga" target="_blank"
-           class="hidden md:flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors glass border border-white/10 hover:border-white/20 rounded-lg px-3.5 py-2">
-          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-          </svg>
-          GitHub
-        </a>
-
-        <button id="menu-btn" class="md:hidden p-2 rounded-lg border border-white/10 text-zinc-400 hover:text-white" onclick="toggleMenu()">
-          <svg id="icon-open"  class="w-5 h-5"        fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-          <svg id="icon-close" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-      </div>
-    </div>
-
-    <!-- Mobile menu -->
-    <div id="mobile-menu" class="md:hidden flex-col border-t border-white/5 px-6 py-5 gap-5 text-sm text-zinc-400">
-      <a href="#features"    class="hover:text-white transition-colors" onclick="closeMenu()">Features</a>
-      <a href="#preview"     class="hover:text-white transition-colors" onclick="closeMenu()">Preview</a>
-      <a href="#como-rodar"  class="hover:text-white transition-colors" onclick="closeMenu()">Instalação</a>
-      <a href="#endpoints"   class="hover:text-white transition-colors" onclick="closeMenu()">API</a>
-      <a href="#tecnologias" class="hover:text-white transition-colors" onclick="closeMenu()">Stack</a>
     </div>
   </header>
 
-  <main class="relative z-10 pt-20">
-
-    <!-- ── Hero ─────────────────────────────────────────────────── -->
-    <section class="min-h-[88vh] flex flex-col items-center justify-center text-center px-6 py-28 max-w-5xl mx-auto">
-
-      <div class="fade-in inline-flex items-center gap-2 glass text-purple-300 text-sm px-4 py-1.5 rounded-full mb-8 border border-purple-500/20">
-        <span class="w-1.5 h-1.5 bg-purple-400 rounded-full animate-pulse"></span>
-        Projeto Full Stack — Flask + Flet
-      </div>
-
-      <h1 class="fade-in text-6xl md:text-7xl font-extrabold tracking-tight leading-[1.08] mb-6" style="transition-delay:.1s">
-        Seu catálogo de<br/>
-        <span class="gradient-text">filmes favoritos</span>
-      </h1>
-
-      <p class="fade-in text-zinc-400 text-xl max-w-2xl mx-auto leading-relaxed mb-10" style="transition-delay:.2s">
-        Aplicação full stack para gerenciar um acervo de filmes. Backend REST com Flask,
-        interface desktop com Flet e documentação automática via Swagger UI.
-      </p>
-
-      <div class="fade-in flex flex-wrap justify-center gap-4 mb-16" style="transition-delay:.3s">
-        <a href="#preview"
-           class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-semibold px-6 py-3 rounded-xl transition-all shadow-lg shadow-purple-900/30 hover:shadow-purple-900/50">
-          Ver Preview
-        </a>
-        <a href="#como-rodar"
-           class="glass border border-white/10 hover:border-white/20 text-white font-semibold px-6 py-3 rounded-xl transition-all">
-          Como Rodar
-        </a>
-      </div>
-
-      <div class="fade-in flex flex-wrap justify-center gap-2 text-sm text-zinc-400" style="transition-delay:.4s">
-        <span class="glass border border-white/8 px-3 py-1 rounded-full">🐍 Flask</span>
-        <span class="glass border border-white/8 px-3 py-1 rounded-full">🖥️ Flet</span>
-        <span class="glass border border-white/8 px-3 py-1 rounded-full">✅ Pydantic</span>
-        <span class="glass border border-white/8 px-3 py-1 rounded-full">📖 Swagger UI</span>
-        <span class="glass border border-white/8 px-3 py-1 rounded-full">🎨 Tailwind CSS</span>
-      </div>
-    </section>
-
-    <!-- ── Stats strip ────────────────────────────────────────────── -->
-    <div class="border-y border-white/5 bg-white/[0.01]">
-      <div class="max-w-6xl mx-auto px-6 py-10 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-
-        <div class="fade-in">
-          <p class="text-4xl font-extrabold gradient-text">3</p>
-          <p class="text-zinc-500 text-sm mt-1">Endpoints REST</p>
+  <main id="topo" class="mx-auto max-w-6xl px-6 pb-20 pt-10">
+    <section class="grid gap-8 py-12 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+      <div>
+        <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-400/10 px-4 py-2 text-sm text-amber-200">
+          <span class="h-2 w-2 rounded-full bg-amber-300"></span>
+          Backend Flask + Frontend Flet + Tailwind CSS
         </div>
-        <div class="fade-in" style="transition-delay:.08s">
-          <p class="text-4xl font-extrabold gradient-text">3</p>
-          <p class="text-zinc-500 text-sm mt-1">Filmes no catálogo</p>
-        </div>
-        <div class="fade-in" style="transition-delay:.16s">
-          <p class="text-4xl font-extrabold gradient-text">100%</p>
-          <p class="text-zinc-500 text-sm mt-1">Python</p>
-        </div>
-        <div class="fade-in" style="transition-delay:.24s">
-          <p class="text-4xl font-extrabold gradient-text">v2</p>
-          <p class="text-zinc-500 text-sm mt-1">Pydantic</p>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- ── Features ──────────────────────────────────────────────── -->
-    <section id="features" class="max-w-6xl mx-auto px-6 py-24">
-      <div class="text-center mb-14 fade-in">
-        <h2 class="text-4xl font-bold mb-4">O que o projeto oferece</h2>
-        <p class="text-zinc-400 text-lg">Três camadas integradas para uma experiência completa.</p>
-      </div>
-
-      <div class="grid md:grid-cols-3 gap-6">
-
-        <div class="fade-in glass rounded-2xl p-8 space-y-4 hover:border-purple-500/25 transition-colors">
-          <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-2xl">🔌</div>
-          <h3 class="text-xl font-semibold">API REST Documentada</h3>
-          <p class="text-zinc-400 text-sm leading-relaxed">Flask-RESTX gera automaticamente uma interface Swagger UI completa para explorar e testar todos os endpoints.</p>
-          <ul class="text-sm text-zinc-500 space-y-1.5">
-            <li class="flex items-center gap-2"><span class="text-purple-400">→</span> GET e POST com validação Pydantic</li>
-            <li class="flex items-center gap-2"><span class="text-purple-400">→</span> Respostas tipadas e documentadas</li>
-            <li class="flex items-center gap-2"><span class="text-purple-400">→</span> Swagger acessível em /api/docs</li>
-          </ul>
-        </div>
-
-        <div class="fade-in glass rounded-2xl p-8 space-y-4 hover:border-blue-500/25 transition-colors" style="transition-delay:.1s">
-          <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-2xl">🖥️</div>
-          <h3 class="text-xl font-semibold">Interface Desktop</h3>
-          <p class="text-zinc-400 text-sm leading-relaxed">Frontend multiplataforma construído com Flet em Python puro. Sem HTML, sem JS — UI rica direto do Python.</p>
-          <ul class="text-sm text-zinc-500 space-y-1.5">
-            <li class="flex items-center gap-2"><span class="text-blue-400">→</span> Windows, macOS e Linux</li>
-            <li class="flex items-center gap-2"><span class="text-blue-400">→</span> Conectado ao backend Flask</li>
-            <li class="flex items-center gap-2"><span class="text-blue-400">→</span> 100% Python</li>
-          </ul>
-        </div>
-
-        <div class="fade-in glass rounded-2xl p-8 space-y-4 hover:border-violet-500/25 transition-colors" style="transition-delay:.2s">
-          <div class="w-12 h-12 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-2xl">🛡️</div>
-          <h3 class="text-xl font-semibold">Validação com Pydantic</h3>
-          <p class="text-zinc-400 text-sm leading-relaxed">Todos os dados de entrada são validados com Pydantic v2, garantindo integridade com mensagens de erro detalhadas.</p>
-          <ul class="text-sm text-zinc-500 space-y-1.5">
-            <li class="flex items-center gap-2"><span class="text-violet-400">→</span> Tipos e limites verificados</li>
-            <li class="flex items-center gap-2"><span class="text-violet-400">→</span> Erros 400 com detalhes do campo</li>
-            <li class="flex items-center gap-2"><span class="text-violet-400">→</span> Schemas reutilizáveis</li>
-          </ul>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- ── Preview ───────────────────────────────────────────────── -->
-    <section id="preview" class="max-w-6xl mx-auto px-6 py-24">
-      <div class="text-center mb-14 fade-in">
-        <h2 class="text-4xl font-bold mb-4">Catálogo em ação</h2>
-        <p class="text-zinc-400 text-lg">
-          Filmes no catálogo — dados servidos pela API em
-          <code class="text-purple-400 bg-purple-950/30 px-1.5 py-0.5 rounded font-mono">GET /api/movies</code>.
+        <h1 class="max-w-3xl text-5xl font-black leading-tight text-white md:text-6xl">
+          Um catálogo de filmes com API documentada, interface desktop e landing page.
+        </h1>
+        <p class="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
+          Este projeto entrega uma aplicação full stack em Python para listar filmes, consultar detalhes por ID e cadastrar
+          novos títulos com validação Pydantic. A documentação Swagger, o frontend em Flet e esta página em Tailwind
+          completam a experiência.
         </p>
+        <div class="mt-8 flex flex-wrap gap-4">
+          <a
+            href="#execucao"
+            class="rounded-2xl bg-amber-400 px-6 py-3 font-semibold text-slate-950 transition hover:bg-amber-300"
+          >
+            Como executar
+          </a>
+          <a
+            href="#endpoints"
+            class="rounded-2xl border border-slate-700 px-6 py-3 font-semibold text-slate-100 transition hover:border-slate-500 hover:bg-slate-900"
+          >
+            Ver endpoints
+          </a>
+        </div>
       </div>
 
-      <div class="fade-in glass rounded-2xl overflow-hidden">
-        <div class="flex items-center gap-2 px-5 py-3.5 border-b border-white/5">
-          <span class="w-3 h-3 rounded-full bg-red-500/60"></span>
-          <span class="w-3 h-3 rounded-full bg-yellow-500/60"></span>
-          <span class="w-3 h-3 rounded-full bg-green-500/60"></span>
-          <span class="ml-3 text-xs text-zinc-500 font-mono">GET http://127.0.0.1:5000/api/movies</span>
+      <div class="glass rounded-[28px] p-6 shadow-2xl shadow-cyan-950/30">
+        <div class="mb-5 flex items-center justify-between">
+          <div>
+            <p class="text-sm uppercase tracking-[0.28em] text-slate-400">Preview do catálogo</p>
+            <h2 class="mt-2 text-2xl font-bold text-white">Filmes carregados pela API</h2>
+          </div>
+          <span class="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-200">GET /api/movies</span>
         </div>
 
-        <div class="grid md:grid-cols-3 gap-5 p-6">
-
-          <div class="glass rounded-xl p-5 space-y-3 hover:border-purple-500/20 transition-colors group">
-            <div class="flex items-start justify-between gap-2">
+        <div class="space-y-4">
+          <article class="rounded-2xl border border-white/10 bg-slate-950/70 p-4">
+            <div class="flex items-start justify-between gap-4">
               <div>
-                <p class="text-xs text-zinc-600 font-mono">#1</p>
-                <h4 class="font-bold text-lg group-hover:text-purple-300 transition-colors">Interstellar</h4>
+                <p class="text-lg font-semibold text-white">Interstellar</p>
+                <p class="mt-1 text-sm text-slate-400">Ficção científica • 2014</p>
               </div>
-              <span class="shrink-0 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-sm font-bold px-2.5 py-1 rounded-lg">⭐ 8.7</span>
+              <span class="rounded-full bg-amber-400/15 px-3 py-1 text-sm font-semibold text-amber-200">⭐ 8.7</span>
             </div>
-            <div class="flex items-center gap-2">
-              <span class="bg-purple-500/10 border border-purple-500/20 text-purple-300 px-2.5 py-0.5 rounded-full text-xs">Ficção científica</span>
-              <span class="text-zinc-600 text-xs">· 2014</span>
-            </div>
-          </div>
-
-          <div class="glass rounded-xl p-5 space-y-3 hover:border-blue-500/20 transition-colors group">
-            <div class="flex items-start justify-between gap-2">
+          </article>
+          <article class="rounded-2xl border border-white/10 bg-slate-950/70 p-4">
+            <div class="flex items-start justify-between gap-4">
               <div>
-                <p class="text-xs text-zinc-600 font-mono">#2</p>
-                <h4 class="font-bold text-lg group-hover:text-blue-300 transition-colors">The Dark Knight</h4>
+                <p class="text-lg font-semibold text-white">The Dark Knight</p>
+                <p class="mt-1 text-sm text-slate-400">Ação • 2008</p>
               </div>
-              <span class="shrink-0 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-sm font-bold px-2.5 py-1 rounded-lg">⭐ 9.0</span>
+              <span class="rounded-full bg-amber-400/15 px-3 py-1 text-sm font-semibold text-amber-200">⭐ 9.0</span>
             </div>
-            <div class="flex items-center gap-2">
-              <span class="bg-blue-500/10 border border-blue-500/20 text-blue-300 px-2.5 py-0.5 rounded-full text-xs">Ação</span>
-              <span class="text-zinc-600 text-xs">· 2008</span>
-            </div>
-          </div>
-
-          <div class="glass rounded-xl p-5 space-y-3 hover:border-violet-500/20 transition-colors group">
-            <div class="flex items-start justify-between gap-2">
+          </article>
+          <article class="rounded-2xl border border-white/10 bg-slate-950/70 p-4">
+            <div class="flex items-start justify-between gap-4">
               <div>
-                <p class="text-xs text-zinc-600 font-mono">#3</p>
-                <h4 class="font-bold text-lg group-hover:text-violet-300 transition-colors">Inception</h4>
+                <p class="text-lg font-semibold text-white">Inception</p>
+                <p class="mt-1 text-sm text-slate-400">Suspense • 2010</p>
               </div>
-              <span class="shrink-0 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-sm font-bold px-2.5 py-1 rounded-lg">⭐ 8.8</span>
+              <span class="rounded-full bg-amber-400/15 px-3 py-1 text-sm font-semibold text-amber-200">⭐ 8.8</span>
             </div>
-            <div class="flex items-center gap-2">
-              <span class="bg-violet-500/10 border border-violet-500/20 text-violet-300 px-2.5 py-0.5 rounded-full text-xs">Suspense</span>
-              <span class="text-zinc-600 text-xs">· 2010</span>
-            </div>
-          </div>
-
-        </div>
-
-        <div class="border-t border-white/5 px-6 py-5">
-          <p class="text-xs text-zinc-600 font-mono mb-3">200 OK · application/json</p>
-          <pre class="text-xs font-mono leading-relaxed overflow-x-auto text-zinc-500"><code><span class="text-zinc-600">[</span>
-  <span class="text-zinc-600">{</span> <span class="text-blue-400">"id"</span>: <span class="text-amber-400">1</span>, <span class="text-blue-400">"title"</span>: <span class="text-green-400">"Interstellar"</span>,    <span class="text-blue-400">"genre"</span>: <span class="text-green-400">"Ficção científica"</span>, <span class="text-blue-400">"year"</span>: <span class="text-amber-400">2014</span>, <span class="text-blue-400">"rating"</span>: <span class="text-amber-400">8.7</span> <span class="text-zinc-600">},</span>
-  <span class="text-zinc-600">{</span> <span class="text-blue-400">"id"</span>: <span class="text-amber-400">2</span>, <span class="text-blue-400">"title"</span>: <span class="text-green-400">"The Dark Knight"</span>, <span class="text-blue-400">"genre"</span>: <span class="text-green-400">"Ação"</span>,              <span class="text-blue-400">"year"</span>: <span class="text-amber-400">2008</span>, <span class="text-blue-400">"rating"</span>: <span class="text-amber-400">9.0</span> <span class="text-zinc-600">},</span>
-  <span class="text-zinc-600">{</span> <span class="text-blue-400">"id"</span>: <span class="text-amber-400">3</span>, <span class="text-blue-400">"title"</span>: <span class="text-green-400">"Inception"</span>,        <span class="text-blue-400">"genre"</span>: <span class="text-green-400">"Suspense"</span>,          <span class="text-blue-400">"year"</span>: <span class="text-amber-400">2010</span>, <span class="text-blue-400">"rating"</span>: <span class="text-amber-400">8.8</span> <span class="text-zinc-600">}</span>
-<span class="text-zinc-600">]</span></code></pre>
+          </article>
         </div>
       </div>
     </section>
 
-    <!-- ── Como rodar ─────────────────────────────────────────────── -->
-    <section id="como-rodar" class="max-w-6xl mx-auto px-6 py-24">
-      <div class="text-center mb-14 fade-in">
-        <h2 class="text-4xl font-bold mb-4">Como executar</h2>
-        <p class="text-zinc-400 text-lg">Três passos para ter o projeto rodando localmente.</p>
+    <section id="visao-geral" class="py-12">
+      <div class="mb-8">
+        <p class="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-300">Visão geral</p>
+        <h2 class="mt-3 text-3xl font-bold text-white md:text-4xl">Três partes integradas em uma única entrega</h2>
       </div>
 
-      <div class="grid md:grid-cols-3 gap-6">
+      <div class="grid gap-6 md:grid-cols-3">
+        <article class="glass rounded-3xl p-6">
+          <p class="text-sm font-semibold uppercase tracking-[0.24em] text-amber-200">Backend</p>
+          <h3 class="mt-4 text-2xl font-semibold text-white">Flask com Blueprint</h3>
+          <p class="mt-3 text-sm leading-7 text-slate-300">
+            A API foi organizada com Blueprint, expõe endpoints REST para listagem, consulta por ID e criação de filmes,
+            e usa Flask-RESTX para documentação Swagger.
+          </p>
+        </article>
+        <article class="glass rounded-3xl p-6">
+          <p class="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-200">Frontend</p>
+          <h3 class="mt-4 text-2xl font-semibold text-white">Flet consumindo a API</h3>
+          <p class="mt-3 text-sm leading-7 text-slate-300">
+            A aplicação desktop lista os dados vindos do endpoint GET, permite cadastrar novos filmes pelo POST
+            e apresenta feedback visual ao usuário a cada ação.
+          </p>
+        </article>
+        <article class="glass rounded-3xl p-6">
+          <p class="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-200">Landing page</p>
+          <h3 class="mt-4 text-2xl font-semibold text-white">Tailwind CSS para apresentação</h3>
+          <p class="mt-3 text-sm leading-7 text-slate-300">
+            Esta página resume o objetivo do projeto, mostra os requisitos atendidos e explica exatamente como
+            executar cada parte da aplicação.
+          </p>
+        </article>
+      </div>
+    </section>
 
-        <div class="fade-in glass rounded-2xl p-7 space-y-5">
-          <div class="flex items-center gap-4">
-            <span class="w-10 h-10 bg-gradient-to-br from-purple-600 to-purple-800 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 shadow-lg shadow-purple-900/30">1</span>
-            <h3 class="font-semibold text-lg">Dependências</h3>
+    <section id="requisitos" class="py-12">
+      <div class="mb-8">
+        <p class="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-300">Checklist</p>
+        <h2 class="mt-3 text-3xl font-bold text-white md:text-4xl">Requisitos da atividade cobertos</h2>
+      </div>
+
+      <div class="glass overflow-hidden rounded-3xl">
+        <div class="grid gap-px bg-white/10 md:grid-cols-2">
+          <div class="bg-slate-950/80 p-6">
+            <p class="text-lg font-semibold text-white">Backend</p>
+            <ul class="mt-4 space-y-3 text-sm leading-7 text-slate-300">
+              <li>Blueprint configurado em <code class="rounded bg-slate-900 px-2 py-1 text-slate-100">backend/api/routes.py</code></li>
+              <li>Dois endpoints GET documentados com Swagger e docstrings</li>
+              <li>Endpoint POST validando payload com Pydantic</li>
+              <li>Swagger UI disponível em <code class="rounded bg-slate-900 px-2 py-1 text-slate-100">/api/docs</code></li>
+            </ul>
           </div>
-          <p class="text-zinc-400 text-sm">Crie um ambiente virtual e instale os pacotes necessários.</p>
-          <div class="code-block bg-zinc-900/80 border border-white/5 rounded-xl p-4 text-xs text-emerald-400 font-mono leading-7 overflow-x-auto"
-               data-copy="python -m venv .venv
+          <div class="bg-slate-950/80 p-6">
+            <p class="text-lg font-semibold text-white">Frontend + Landing</p>
+            <ul class="mt-4 space-y-3 text-sm leading-7 text-slate-300">
+              <li>Tela Flet consumindo o GET para listar os filmes</li>
+              <li>Formulário Flet enviando dados para o POST com feedback ao usuário</li>
+              <li>Landing page estática em HTML com Tailwind CSS</li>
+              <li>Nome, descrição e instruções de execução apresentados nesta página</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="endpoints" class="py-12">
+      <div class="mb-8">
+        <p class="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-300">API</p>
+        <h2 class="mt-3 text-3xl font-bold text-white md:text-4xl">Endpoints principais</h2>
+      </div>
+
+      <div class="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+        <div class="space-y-4">
+          <article class="glass rounded-3xl p-6">
+            <div class="flex items-center gap-3">
+              <span class="rounded-full bg-emerald-400/15 px-3 py-1 text-xs font-bold text-emerald-200">GET</span>
+              <code class="text-lg font-semibold text-white">/api/movies</code>
+            </div>
+            <p class="mt-4 text-sm leading-7 text-slate-300">
+              Lista todos os filmes cadastrados no catálogo.
+            </p>
+          </article>
+          <article class="glass rounded-3xl p-6">
+            <div class="flex items-center gap-3">
+              <span class="rounded-full bg-emerald-400/15 px-3 py-1 text-xs font-bold text-emerald-200">GET</span>
+              <code class="text-lg font-semibold text-white">/api/movies/&lt;id&gt;</code>
+            </div>
+            <p class="mt-4 text-sm leading-7 text-slate-300">
+              Retorna os dados de um filme específico pelo identificador. Se não existir, responde com <code class="rounded bg-slate-900 px-2 py-1 text-slate-100">404</code>.
+            </p>
+          </article>
+          <article class="glass rounded-3xl p-6">
+            <div class="flex items-center gap-3">
+              <span class="rounded-full bg-sky-400/15 px-3 py-1 text-xs font-bold text-sky-200">POST</span>
+              <code class="text-lg font-semibold text-white">/api/movies</code>
+            </div>
+            <p class="mt-4 text-sm leading-7 text-slate-300">
+              Cadastra um novo filme com validação de título, gênero, ano e nota usando Pydantic.
+            </p>
+          </article>
+        </div>
+
+        <div class="code-block rounded-3xl p-6">
+          <p class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-400">Exemplo de payload</p>
+          <pre class="mt-4 overflow-x-auto text-sm leading-7 text-cyan-200"><code>{
+  "title": "Matrix",
+  "genre": "Ficção científica",
+  "year": 1999,
+  "rating": 8.7
+}</code></pre>
+
+          <p class="mt-8 text-sm font-semibold uppercase tracking-[0.24em] text-slate-400">Exemplo de resposta com erro</p>
+          <pre class="mt-4 overflow-x-auto text-sm leading-7 text-rose-200"><code>{
+  "error": [
+    {
+      "loc": ["title"],
+      "msg": "String should have at least 1 character"
+    }
+  ]
+}</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="execucao" class="py-12">
+      <div class="mb-8">
+        <p class="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-300">Execução</p>
+        <h2 class="mt-3 text-3xl font-bold text-white md:text-4xl">Como rodar o projeto</h2>
+      </div>
+
+      <div class="grid gap-6 lg:grid-cols-3">
+        <article class="glass rounded-3xl p-6">
+          <div class="flex items-center gap-4">
+            <span class="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-400/15 text-sm font-bold text-amber-200">1</span>
+            <h3 class="text-xl font-semibold text-white">Instale as dependências</h3>
+          </div>
+          <pre class="code-block mt-5 overflow-x-auto rounded-2xl p-4 text-sm leading-7 text-emerald-200"><code>python -m venv .venv
 .venv\Scripts\activate
-pip install -r requirements.txt">
-            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
-            <p><span class="text-zinc-600"># criar venv</span></p>
-            <p>python -m venv .venv</p>
-            <br>
-            <p><span class="text-zinc-600"># ativar (Windows)</span></p>
-            <p>.venv\Scripts\activate</p>
-            <br>
-            <p><span class="text-zinc-600"># instalar pacotes</span></p>
-            <p>pip install -r requirements.txt</p>
-          </div>
-        </div>
+pip install -r requirements.txt</code></pre>
+        </article>
 
-        <div class="fade-in glass rounded-2xl p-7 space-y-5" style="transition-delay:.1s">
+        <article class="glass rounded-3xl p-6">
           <div class="flex items-center gap-4">
-            <span class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 shadow-lg shadow-blue-900/30">2</span>
-            <h3 class="font-semibold text-lg">Backend</h3>
+            <span class="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-400/15 text-sm font-bold text-amber-200">2</span>
+            <h3 class="text-xl font-semibold text-white">Inicie o backend</h3>
           </div>
-          <p class="text-zinc-400 text-sm">Inicie o servidor Flask. A API e o Swagger ficam disponíveis.</p>
-          <div class="code-block bg-zinc-900/80 border border-white/5 rounded-xl p-4 text-xs text-emerald-400 font-mono leading-7 overflow-x-auto"
-               data-copy="cd backend
-python app.py">
-            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
-            <p>cd backend</p>
-            <p>python app.py</p>
-            <br>
-            <p><span class="text-zinc-600"># API disponível em:</span></p>
-            <p class="text-blue-400">http://127.0.0.1:5000/api</p>
-            <br>
-            <p><span class="text-zinc-600"># Swagger em:</span></p>
-            <p class="text-blue-400">http://127.0.0.1:5000/api/docs</p>
-          </div>
-        </div>
+          <pre class="code-block mt-5 overflow-x-auto rounded-2xl p-4 text-sm leading-7 text-emerald-200"><code>python -m backend.app</code></pre>
+          <p class="mt-4 text-sm leading-7 text-slate-300">
+            API em <code class="rounded bg-slate-900 px-2 py-1 text-slate-100">http://127.0.0.1:5000/api</code><br>
+            Swagger em <code class="rounded bg-slate-900 px-2 py-1 text-slate-100">http://127.0.0.1:5000/api/docs</code>
+          </p>
+        </article>
 
-        <div class="fade-in glass rounded-2xl p-7 space-y-5" style="transition-delay:.2s">
+        <article class="glass rounded-3xl p-6">
           <div class="flex items-center gap-4">
-            <span class="w-10 h-10 bg-gradient-to-br from-violet-600 to-violet-800 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 shadow-lg shadow-violet-900/30">3</span>
-            <h3 class="font-semibold text-lg">Frontend</h3>
+            <span class="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-400/15 text-sm font-bold text-amber-200">3</span>
+            <h3 class="text-xl font-semibold text-white">Abra o frontend Flet</h3>
           </div>
-          <p class="text-zinc-400 text-sm">Abra a interface desktop Flet em um novo terminal.</p>
-          <div class="code-block bg-zinc-900/80 border border-white/5 rounded-xl p-4 text-xs text-emerald-400 font-mono leading-7 overflow-x-auto"
-               data-copy="cd frontend
-flet run main.py">
-            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
-            <p><span class="text-zinc-600"># em outro terminal</span></p>
-            <p>cd frontend</p>
-            <p>flet run main.py</p>
-            <br>
-            <p><span class="text-zinc-600"># janela desktop abre</span></p>
-            <p><span class="text-zinc-600"># conectada ao Flask</span></p>
-          </div>
-        </div>
-
+          <pre class="code-block mt-5 overflow-x-auto rounded-2xl p-4 text-sm leading-7 text-emerald-200"><code>flet run frontend/main.py</code></pre>
+          <p class="mt-4 text-sm leading-7 text-slate-300">
+            A interface consome o GET para listar os filmes e o POST para cadastrar novos títulos.
+          </p>
+        </article>
       </div>
     </section>
 
-    <!-- ── Endpoints ──────────────────────────────────────────────── -->
-    <section id="endpoints" class="max-w-6xl mx-auto px-6 py-24">
-      <div class="mb-14 fade-in">
-        <h2 class="text-4xl font-bold mb-4">Endpoints da API</h2>
-        <p class="text-zinc-400 text-lg">
-          Documentação interativa em
-          <code class="text-purple-400 bg-purple-950/30 px-1.5 py-0.5 rounded font-mono">/api/docs</code>
-          (Swagger UI).
-        </p>
-      </div>
-
-      <div class="space-y-4">
-
-        <div class="fade-in glass rounded-2xl p-6 flex items-start gap-5 hover:border-emerald-500/20 transition-colors">
-          <span class="badge-get text-xs font-bold font-mono px-3 py-1.5 rounded-lg mt-0.5 shrink-0">GET</span>
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-3 flex-wrap mb-2">
-              <p class="font-mono font-semibold text-lg">/api/movies</p>
-              <span class="text-xs text-zinc-600 bg-zinc-900 border border-white/5 px-2 py-0.5 rounded">200 OK</span>
-            </div>
-            <p class="text-zinc-400 text-sm">Lista todos os filmes cadastrados. Retorna um array JSON com todos os registros do catálogo.</p>
-          </div>
-        </div>
-
-        <div class="fade-in glass rounded-2xl p-6 flex items-start gap-5 hover:border-emerald-500/20 transition-colors" style="transition-delay:.05s">
-          <span class="badge-get text-xs font-bold font-mono px-3 py-1.5 rounded-lg mt-0.5 shrink-0">GET</span>
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-3 flex-wrap mb-2">
-              <p class="font-mono font-semibold text-lg">/api/movies/<span class="text-purple-400">{id}</span></p>
-              <span class="text-xs text-zinc-600 bg-zinc-900 border border-white/5 px-2 py-0.5 rounded">200 · 404</span>
-            </div>
-            <p class="text-zinc-400 text-sm">Retorna os detalhes de um filme pelo ID. Devolve 404 com mensagem de erro se o ID não existir.</p>
-          </div>
-        </div>
-
-        <div class="fade-in glass rounded-2xl p-6 flex items-start gap-5 hover:border-blue-500/20 transition-colors" style="transition-delay:.1s">
-          <span class="badge-post text-xs font-bold font-mono px-3 py-1.5 rounded-lg mt-0.5 shrink-0">POST</span>
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-3 flex-wrap mb-2">
-              <p class="font-mono font-semibold text-lg">/api/movies</p>
-              <span class="text-xs text-zinc-600 bg-zinc-900 border border-white/5 px-2 py-0.5 rounded">201 · 400</span>
-            </div>
-            <p class="text-zinc-400 text-sm mb-4">Cadastra um novo filme. Todos os campos são validados com Pydantic antes de persistir.</p>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              <div class="bg-zinc-900/60 border border-white/5 rounded-lg px-3 py-2.5 text-xs">
-                <p class="font-mono text-purple-300 mb-1">title</p>
-                <p class="text-zinc-500">string · 1–100</p>
-              </div>
-              <div class="bg-zinc-900/60 border border-white/5 rounded-lg px-3 py-2.5 text-xs">
-                <p class="font-mono text-purple-300 mb-1">genre</p>
-                <p class="text-zinc-500">string · 1–60</p>
-              </div>
-              <div class="bg-zinc-900/60 border border-white/5 rounded-lg px-3 py-2.5 text-xs">
-                <p class="font-mono text-purple-300 mb-1">year</p>
-                <p class="text-zinc-500">int · 1888–2100</p>
-              </div>
-              <div class="bg-zinc-900/60 border border-white/5 rounded-lg px-3 py-2.5 text-xs">
-                <p class="font-mono text-purple-300 mb-1">rating</p>
-                <p class="text-zinc-500">float · 0.0–10.0</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Exemplo de erro 400 -->
-        <div class="fade-in glass rounded-2xl overflow-hidden" style="transition-delay:.15s">
-          <div class="flex items-center gap-3 px-6 py-4 border-b border-white/5">
-            <span class="badge-err text-xs font-bold font-mono px-3 py-1 rounded-lg shrink-0">400</span>
-            <p class="text-sm text-zinc-400">Exemplo de resposta quando a validação Pydantic falha — <code class="font-mono text-red-400 text-xs">title</code> enviado vazio</p>
-          </div>
-          <div class="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-white/5">
-            <!-- Request -->
-            <div class="px-6 py-5">
-              <p class="text-xs text-zinc-600 font-mono mb-3">Request body</p>
-              <pre class="text-xs font-mono leading-relaxed text-zinc-500 overflow-x-auto"><code><span class="text-zinc-600">{</span>
-  <span class="text-blue-400">"title"</span>:  <span class="text-red-400">""</span>,
-  <span class="text-blue-400">"genre"</span>:  <span class="text-green-400">"Ação"</span>,
-  <span class="text-blue-400">"year"</span>:   <span class="text-amber-400">1999</span>,
-  <span class="text-blue-400">"rating"</span>: <span class="text-amber-400">8.7</span>
-<span class="text-zinc-600">}</span></code></pre>
-            </div>
-            <!-- Response -->
-            <div class="px-6 py-5">
-              <p class="text-xs text-zinc-600 font-mono mb-3">400 Bad Request · application/json</p>
-              <pre class="text-xs font-mono leading-relaxed text-zinc-500 overflow-x-auto"><code><span class="text-zinc-600">{</span>
-  <span class="text-blue-400">"error"</span>: <span class="text-zinc-600">[{</span>
-    <span class="text-blue-400">"type"</span>:  <span class="text-green-400">"string_too_short"</span>,
-    <span class="text-blue-400">"loc"</span>:   <span class="text-zinc-600">[</span><span class="text-green-400">"title"</span><span class="text-zinc-600">]</span>,
-    <span class="text-blue-400">"msg"</span>:   <span class="text-green-400">"at least 1 character"</span>,
-    <span class="text-blue-400">"input"</span>: <span class="text-red-400">""</span>
-  <span class="text-zinc-600">}]</span>
-<span class="text-zinc-600">}</span></code></pre>
-            </div>
-          </div>
-        </div>
-
+    <section class="py-12">
+      <div class="glass rounded-[32px] p-8">
+        <p class="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-300">Estrutura</p>
+        <h2 class="mt-3 text-3xl font-bold text-white md:text-4xl">Organização do projeto</h2>
+        <pre class="code-block mt-6 overflow-x-auto rounded-3xl p-6 text-sm leading-8 text-slate-300"><code>catalogo-filmes/
+├── backend/
+│   ├── app.py
+│   ├── data.py
+│   └── api/
+│       ├── routes.py
+│       └── schemas.py
+├── frontend/
+│   └── main.py
+├── landing/
+│   └── index.html
+├── .gitignore
+├── README.md
+└── requirements.txt</code></pre>
       </div>
     </section>
-
-    <!-- ── Stack ──────────────────────────────────────────────────── -->
-    <section id="tecnologias" class="max-w-6xl mx-auto px-6 py-24">
-      <div class="text-center mb-14 fade-in">
-        <h2 class="text-4xl font-bold mb-4">Stack do Projeto</h2>
-        <p class="text-zinc-400 text-lg">Cada tecnologia escolhida com propósito específico.</p>
-      </div>
-
-      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-
-        <div class="fade-in glass rounded-2xl p-7 space-y-4 text-center hover:border-green-500/20 transition-colors">
-          <div class="text-5xl">🐍</div>
-          <div>
-            <h3 class="font-semibold text-lg">Flask + RESTX</h3>
-            <p class="text-xs text-zinc-600 mt-0.5 font-mono">Backend</p>
-          </div>
-          <p class="text-zinc-400 text-sm leading-relaxed">Micro-framework Python com Blueprints e geração automática de Swagger</p>
-        </div>
-
-        <div class="fade-in glass rounded-2xl p-7 space-y-4 text-center hover:border-blue-500/20 transition-colors" style="transition-delay:.1s">
-          <div class="text-5xl">🖥️</div>
-          <div>
-            <h3 class="font-semibold text-lg">Flet</h3>
-            <p class="text-xs text-zinc-600 mt-0.5 font-mono">Frontend</p>
-          </div>
-          <p class="text-zinc-400 text-sm leading-relaxed">UI desktop multiplataforma em Python puro — sem HTML, sem JS</p>
-        </div>
-
-        <div class="fade-in glass rounded-2xl p-7 space-y-4 text-center hover:border-violet-500/20 transition-colors" style="transition-delay:.2s">
-          <div class="text-5xl">✅</div>
-          <div>
-            <h3 class="font-semibold text-lg">Pydantic v2</h3>
-            <p class="text-xs text-zinc-600 mt-0.5 font-mono">Validação</p>
-          </div>
-          <p class="text-zinc-400 text-sm leading-relaxed">Validação de dados tipada com mensagens de erro detalhadas por campo</p>
-        </div>
-
-        <div class="fade-in glass rounded-2xl p-7 space-y-4 text-center hover:border-cyan-500/20 transition-colors" style="transition-delay:.3s">
-          <div class="text-5xl">📖</div>
-          <div>
-            <h3 class="font-semibold text-lg">Swagger UI</h3>
-            <p class="text-xs text-zinc-600 mt-0.5 font-mono">Docs</p>
-          </div>
-          <p class="text-zinc-400 text-sm leading-relaxed">Documentação interativa gerada automaticamente pelo Flask-RESTX</p>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- ── Estrutura ───────────────────────────────────────────────── -->
-    <section id="estrutura" class="max-w-6xl mx-auto px-6 py-24">
-      <div class="text-center mb-14 fade-in">
-        <h2 class="text-4xl font-bold mb-4">Estrutura do Projeto</h2>
-        <p class="text-zinc-400 text-lg">Organização clara de arquivos e responsabilidades.</p>
-      </div>
-
-      <div class="fade-in glass rounded-2xl overflow-hidden">
-        <div class="flex items-center gap-2 px-5 py-3.5 border-b border-white/5">
-          <span class="w-3 h-3 rounded-full bg-red-500/60"></span>
-          <span class="w-3 h-3 rounded-full bg-yellow-500/60"></span>
-          <span class="w-3 h-3 rounded-full bg-green-500/60"></span>
-          <span class="ml-3 text-xs text-zinc-500 font-mono">catalogo-filmes/</span>
-        </div>
-
-        <div class="p-7 font-mono text-sm leading-8 text-zinc-500">
-          <p><span class="text-zinc-600">├──</span> <span class="text-blue-400">backend/</span></p>
-          <p class="pl-6"><span class="text-zinc-600">├──</span> <span class="text-white">app.py</span>      <span class="font-sans text-xs text-zinc-700 ml-3">Factory da aplicação Flask</span></p>
-          <p class="pl-6"><span class="text-zinc-600">├──</span> <span class="text-white">data.py</span>     <span class="font-sans text-xs text-zinc-700 ml-3">Dados em memória</span></p>
-          <p class="pl-6"><span class="text-zinc-600">└──</span> <span class="text-blue-400">api/</span></p>
-          <p class="pl-12"><span class="text-zinc-600">├──</span> <span class="text-white">routes.py</span>   <span class="font-sans text-xs text-zinc-700 ml-3">Endpoints + Swagger</span></p>
-          <p class="pl-12"><span class="text-zinc-600">└──</span> <span class="text-white">schemas.py</span>  <span class="font-sans text-xs text-zinc-700 ml-3">Modelos Pydantic</span></p>
-          <p class="mt-1"><span class="text-zinc-600">├──</span> <span class="text-purple-400">frontend/</span></p>
-          <p class="pl-6"><span class="text-zinc-600">└──</span> <span class="text-white">main.py</span>     <span class="font-sans text-xs text-zinc-700 ml-3">Interface desktop Flet</span></p>
-          <p><span class="text-zinc-600">├──</span> <span class="text-violet-400">landing/</span></p>
-          <p class="pl-6"><span class="text-zinc-600">└──</span> <span class="text-white">index.html</span>  <span class="font-sans text-xs text-zinc-700 ml-3">Esta página</span></p>
-          <p><span class="text-zinc-600">└──</span> <span class="text-white">requirements.txt</span>  <span class="font-sans text-xs text-zinc-700 ml-3">Dependências Python</span></p>
-        </div>
-      </div>
-    </section>
-
   </main>
 
-  <!-- Footer -->
-  <footer class="border-t border-white/5 relative z-10">
-    <div class="max-w-6xl mx-auto px-6 py-10 flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div class="flex items-center gap-2.5 font-semibold text-zinc-500">
-        <span class="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-xs">🎬</span>
-        CatálogoFilmes — Flask · Flet · Pydantic
-      </div>
-      <div class="flex items-center gap-6 text-sm text-zinc-600">
-        <a href="#" class="hover:text-zinc-400 transition-colors">Topo</a>
-        <a href="#endpoints" class="hover:text-zinc-400 transition-colors">API</a>
-        <a href="https://github.com/MauricioRVeiga" target="_blank" class="hover:text-zinc-400 transition-colors">GitHub</a>
-        <span>LDW · 2025</span>
-      </div>
+  <footer class="border-t border-white/10 bg-slate-950/80">
+    <div class="mx-auto flex max-w-6xl flex-col gap-4 px-6 py-8 text-sm text-slate-400 md:flex-row md:items-center md:justify-between">
+      <p>Catálogo de Filmes • Projeto full stack com Flask, Flet e Tailwind CSS.</p>
+      <a href="#topo" class="font-semibold text-slate-200 transition hover:text-white">Voltar ao topo</a>
     </div>
   </footer>
-
-  <!-- Toast notification -->
-  <div id="toast" role="status" aria-live="polite">
-    <span style="color:#34d399;font-size:14px">✓</span>
-    <span id="toast-msg">Copiado!</span>
-  </div>
-
-  <!-- Back to top -->
-  <button id="back-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Voltar ao topo">
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
-    </svg>
-  </button>
-
-  <script>
-    // ── Mobile menu ────────────────────────────────────────────────
-    function toggleMenu() {
-      const menu  = document.getElementById('mobile-menu');
-      const open  = document.getElementById('icon-open');
-      const close = document.getElementById('icon-close');
-      menu.classList.toggle('open');
-      open.classList.toggle('hidden');
-      close.classList.toggle('hidden');
-    }
-    function closeMenu() {
-      document.getElementById('mobile-menu').classList.remove('open');
-      document.getElementById('icon-open').classList.remove('hidden');
-      document.getElementById('icon-close').classList.add('hidden');
-    }
-
-    // ── Fade-in on scroll ──────────────────────────────────────────
-    const fadeObserver = new IntersectionObserver(
-      entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
-      { threshold: 0.1 }
-    );
-    document.querySelectorAll('.fade-in').forEach(el => fadeObserver.observe(el));
-
-    // ── Scroll progress + back-to-top ──────────────────────────────
-    const scrollBar = document.getElementById('scroll-bar');
-    const backTop   = document.getElementById('back-top');
-    window.addEventListener('scroll', () => {
-      const scrolled  = window.scrollY;
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-      scrollBar.style.width = (maxScroll > 0 ? (scrolled / maxScroll) * 100 : 0) + '%';
-      backTop.classList.toggle('show', scrolled > 400);
-    }, { passive: true });
-
-    // ── Active nav link (section tracking) ────────────────────────
-    const navLinks = document.querySelectorAll('#nav-desktop a');
-    const sections = document.querySelectorAll('main section[id]');
-
-    const sectionObserver = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const id = entry.target.id;
-          navLinks.forEach(link => {
-            link.classList.toggle('active', link.getAttribute('href') === '#' + id);
-          });
-        }
-      });
-    }, { rootMargin: '-25% 0px -65% 0px' });
-
-    sections.forEach(s => sectionObserver.observe(s));
-
-    // ── Copy to clipboard ──────────────────────────────────────────
-    let toastTimer;
-
-    function copyCode(btn) {
-      const block = btn.closest('.code-block');
-      const text  = block.dataset.copy || '';
-      navigator.clipboard.writeText(text).then(() => {
-        btn.textContent = 'Copiado!';
-        btn.classList.add('copied');
-        showToast('Comando copiado!');
-        setTimeout(() => {
-          btn.textContent = 'Copiar';
-          btn.classList.remove('copied');
-        }, 2000);
-      }).catch(() => showToast('Erro ao copiar'));
-    }
-
-    function showToast(msg) {
-      const toast = document.getElementById('toast');
-      document.getElementById('toast-msg').textContent = msg;
-      toast.classList.add('show');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
-    }
-  </script>
-
 </body>
 </html>

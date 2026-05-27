@@ -2,179 +2,358 @@ import flet as ft
 import requests
 
 API_URL = "http://127.0.0.1:5000/api"
+REQUEST_TIMEOUT = 10
 
 
 def make_field(label: str, keyboard_type=None) -> ft.TextField:
     return ft.TextField(
         label=label,
-        width=400,
-        bgcolor=ft.Colors.GREY_800,
+        filled=True,
+        expand=True,
+        height=56,
+        bgcolor=ft.Colors.with_opacity(0.04, ft.Colors.WHITE),
         color=ft.Colors.WHITE,
-        label_style=ft.TextStyle(color=ft.Colors.GREY_400),
-        border_color=ft.Colors.GREY_600,
+        label_style=ft.TextStyle(color=ft.Colors.BLUE_GREY_200),
+        border_color=ft.Colors.with_opacity(0.12, ft.Colors.WHITE),
         focused_border_color=ft.Colors.AMBER_400,
         cursor_color=ft.Colors.AMBER_400,
         keyboard_type=keyboard_type,
     )
 
 
+def parse_api_error(response: requests.Response) -> str:
+    try:
+        payload = response.json()
+    except ValueError:
+        return response.text or "Não foi possível processar a resposta da API."
+
+    error = payload.get("error")
+    if isinstance(error, list):
+        messages = []
+        for item in error:
+            field = ".".join(str(part) for part in item.get("loc", [])) or "campo"
+            message = item.get("msg", "valor inválido")
+            messages.append(f"{field}: {message}")
+        return " | ".join(messages)
+
+    if isinstance(error, str):
+        return error
+
+    return payload.get("message", "Ocorreu um erro inesperado.")
+
+
 def main(page: ft.Page):
     page.title = "Catálogo de Filmes"
+    page.theme_mode = ft.ThemeMode.DARK
+    page.bgcolor = "#0b1120"
+    page.padding = 24
     page.scroll = ft.ScrollMode.AUTO
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
-    page.bgcolor = ft.Colors.GREY_900
-    page.padding = 32
+    page.window_min_width = 420
+    page.window_min_height = 700
 
-    movies_list = ft.Column(spacing=8)
-    feedback = ft.Text("", size=13, weight=ft.FontWeight.W_500)
+    movies_list = ft.Column(spacing=10)
+    catalog_summary = ft.Text("Carregando catálogo...", color=ft.Colors.BLUE_GREY_200)
+    feedback_text = ft.Text(size=13, weight=ft.FontWeight.W_500)
+    feedback_box = ft.Container(
+        visible=False,
+        padding=12,
+        border_radius=12,
+        content=feedback_text,
+    )
 
     title_field = make_field("Título")
     genre_field = make_field("Gênero")
     year_field = make_field("Ano", keyboard_type=ft.KeyboardType.NUMBER)
-    rating_field = make_field("Nota (0.0 – 10.0)", keyboard_type=ft.KeyboardType.NUMBER)
+    rating_field = make_field("Nota (0.0 a 10.0)", keyboard_type=ft.KeyboardType.NUMBER)
 
-    def set_feedback(msg: str, success: bool):
-        feedback.value = msg
-        feedback.color = ft.Colors.GREEN_400 if success else ft.Colors.RED_400
+    refresh_button = ft.ElevatedButton(
+        "Atualizar catálogo",
+        icon=ft.Icons.REFRESH,
+        bgcolor="#1e293b",
+        color=ft.Colors.WHITE,
+    )
+    submit_button = ft.ElevatedButton(
+        "Salvar filme",
+        icon=ft.Icons.SAVE,
+        bgcolor="#f59e0b",
+        color="#111827",
+        width=220,
+    )
+
+    def set_feedback(message: str, success: bool):
+        feedback_text.value = message
+        feedback_text.color = "#d1fae5" if success else "#fee2e2"
+        feedback_box.bgcolor = "#14532d" if success else "#7f1d1d"
+        feedback_box.border = ft.border.all(1, "#22c55e" if success else "#ef4444")
+        feedback_box.visible = True
         page.update()
+
+    def set_buttons_busy(is_busy: bool):
+        refresh_button.disabled = is_busy
+        submit_button.disabled = is_busy
+        submit_button.text = "Salvando..." if is_busy else "Salvar filme"
+        page.update()
+
+    def clear_form():
+        title_field.value = ""
+        genre_field.value = ""
+        year_field.value = ""
+        rating_field.value = ""
 
     def movie_card(movie: dict) -> ft.Container:
         return ft.Container(
+            padding=16,
+            border_radius=18,
+            bgcolor="#111827",
+            border=ft.border.all(1, "#1f2937"),
             content=ft.Row(
+                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                vertical_alignment=ft.CrossAxisAlignment.START,
                 controls=[
-                    ft.Text("🎬", size=22),
-                    ft.Column(
+                    ft.Row(
+                        spacing=12,
                         controls=[
-                            ft.Text(
-                                movie["title"],
-                                size=15,
-                                weight=ft.FontWeight.BOLD,
-                                color=ft.Colors.AMBER_300,
+                            ft.Container(
+                                width=42,
+                                height=42,
+                                border_radius=12,
+                                bgcolor="#1d4ed8",
+                                alignment=ft.alignment.center,
+                                content=ft.Text("🎬", size=18),
                             ),
-                            ft.Text(
-                                f'{movie["genre"]}  •  {movie["year"]}  •  ⭐ {movie["rating"]}',
-                                size=12,
-                                color=ft.Colors.GREY_400,
+                            ft.Column(
+                                spacing=4,
+                                controls=[
+                                    ft.Text(
+                                        movie["title"],
+                                        size=16,
+                                        weight=ft.FontWeight.BOLD,
+                                        color=ft.Colors.WHITE,
+                                    ),
+                                    ft.Text(
+                                        f'{movie["genre"]} • {movie["year"]}',
+                                        size=12,
+                                        color=ft.Colors.BLUE_GREY_200,
+                                    ),
+                                ],
                             ),
                         ],
-                        spacing=2,
-                        expand=True,
+                    ),
+                    ft.Container(
+                        padding=ft.padding.symmetric(horizontal=12, vertical=8),
+                        border_radius=999,
+                        bgcolor="#3f2b05",
+                        content=ft.Text(
+                            f'⭐ {movie["rating"]}',
+                            size=12,
+                            weight=ft.FontWeight.W_600,
+                            color="#fcd34d",
+                        ),
                     ),
                 ],
-                spacing=12,
             ),
-            padding=14,
-            border_radius=10,
-            bgcolor=ft.Colors.GREY_800,
         )
 
     def load_movies(e=None):
-        movies_list.controls.clear()
+        set_buttons_busy(True)
+        movies_list.controls[:] = [ft.ProgressRing(color=ft.Colors.AMBER_400)]
+        catalog_summary.value = "Sincronizando com a API..."
+        page.update()
+
         try:
-            response = requests.get(f"{API_URL}/movies", timeout=10)
+            response = requests.get(f"{API_URL}/movies", timeout=REQUEST_TIMEOUT)
+            response.raise_for_status()
             data = response.json()
+            movies_list.controls.clear()
+
             if not data:
                 movies_list.controls.append(
-                    ft.Text(
-                        "Nenhum filme no catálogo ainda.",
-                        italic=True,
-                        color=ft.Colors.GREY_500,
+                    ft.Container(
+                        padding=20,
+                        border_radius=16,
+                        bgcolor="#111827",
+                        border=ft.border.all(1, "#1f2937"),
+                        content=ft.Text(
+                            "Nenhum filme cadastrado ainda. Use o formulário para criar o primeiro item.",
+                            color=ft.Colors.BLUE_GREY_200,
+                        ),
                     )
                 )
             else:
                 for movie in data:
                     movies_list.controls.append(movie_card(movie))
+
+            catalog_summary.value = f"{len(data)} filme(s) carregado(s) do endpoint GET /api/movies."
             set_feedback("Catálogo atualizado com sucesso.", True)
-        except Exception as exc:
-            set_feedback(f"Erro ao carregar filmes: {exc}", False)
-        page.update()
+        except requests.RequestException as exc:
+            movies_list.controls.clear()
+            catalog_summary.value = "Não foi possível carregar o catálogo."
+            set_feedback(f"Erro ao consultar a API: {exc}", False)
+        finally:
+            set_buttons_busy(False)
+            page.update()
 
     def submit_movie(e):
-        try:
-            payload = {
-                "title": title_field.value.strip(),
-                "genre": genre_field.value.strip(),
-                "year": int(year_field.value),
-                "rating": float(rating_field.value),
-            }
-        except ValueError:
-            set_feedback("Ano deve ser inteiro e Nota deve ser número decimal.", False)
+        raw_title = (title_field.value or "").strip()
+        raw_genre = (genre_field.value or "").strip()
+        raw_year = (year_field.value or "").strip()
+        raw_rating = (rating_field.value or "").strip()
+
+        if not all([raw_title, raw_genre, raw_year, raw_rating]):
+            set_feedback("Preencha título, gênero, ano e nota antes de salvar.", False)
             return
 
         try:
-            response = requests.post(f"{API_URL}/movies", json=payload, timeout=10)
+            payload = {
+                "title": raw_title,
+                "genre": raw_genre,
+                "year": int(raw_year),
+                "rating": float(raw_rating),
+            }
+        except ValueError:
+            set_feedback("Ano deve ser inteiro e nota deve ser um número decimal.", False)
+            return
+
+        set_buttons_busy(True)
+        try:
+            response = requests.post(
+                f"{API_URL}/movies",
+                json=payload,
+                timeout=REQUEST_TIMEOUT,
+            )
             if response.status_code == 201:
-                set_feedback(f'"{payload["title"]}" adicionado ao catálogo!', True)
-                title_field.value = ""
-                genre_field.value = ""
-                year_field.value = ""
-                rating_field.value = ""
+                clear_form()
+                set_feedback(f'"{payload["title"]}" foi adicionado ao catálogo.', True)
                 load_movies()
             else:
-                erros = response.json().get("error", response.text)
-                set_feedback(f"Erro de validação: {erros}", False)
-        except Exception as exc:
-            set_feedback(f"Falha na conexão: {exc}", False)
-        page.update()
+                set_feedback(parse_api_error(response), False)
+        except requests.RequestException as exc:
+            set_feedback(f"Falha ao enviar dados para a API: {exc}", False)
+        finally:
+            set_buttons_busy(False)
+            page.update()
 
-    page.add(
-        # Cabeçalho
-        ft.Text(
-            "🎬  Catálogo de Filmes",
-            size=30,
-            weight=ft.FontWeight.BOLD,
-            color=ft.Colors.AMBER_400,
-        ),
-        ft.Text(
-            "Seu acervo pessoal de filmes favoritos",
-            size=13,
-            color=ft.Colors.GREY_500,
-        ),
-        ft.Divider(height=28, color=ft.Colors.GREY_700),
+    refresh_button.on_click = load_movies
+    submit_button.on_click = submit_movie
 
-        # Seção: lista de filmes
-        ft.Row(
+    header = ft.Container(
+        width=960,
+        padding=24,
+        border_radius=24,
+        bgcolor="#111827",
+        border=ft.border.all(1, "#1f2937"),
+        content=ft.Column(
+            spacing=10,
+            controls=[
+                ft.Row(
+                    controls=[
+                        ft.Container(
+                            padding=ft.padding.symmetric(horizontal=12, vertical=6),
+                            border_radius=999,
+                            bgcolor="#172554",
+                            content=ft.Text(
+                                "Flask + Flet + Pydantic",
+                                size=12,
+                                color="#93c5fd",
+                            ),
+                        )
+                    ]
+                ),
+                ft.Text(
+                    "Catálogo de Filmes",
+                    size=32,
+                    weight=ft.FontWeight.BOLD,
+                    color=ft.Colors.WHITE,
+                ),
+                ft.Text(
+                    "Consuma os endpoints GET da API e cadastre novos filmes com validação Pydantic pelo formulário.",
+                    size=14,
+                    color=ft.Colors.BLUE_GREY_200,
+                ),
+            ],
+        ),
+    )
+
+    list_card = ft.Container(
+        width=560,
+        padding=22,
+        border_radius=24,
+        bgcolor="#0f172a",
+        border=ft.border.all(1, "#1e293b"),
+        content=ft.Column(
+            spacing=18,
+            controls=[
+                ft.Row(
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    controls=[
+                        ft.Column(
+                            spacing=4,
+                            controls=[
+                                ft.Text(
+                                    "Filmes cadastrados",
+                                    size=20,
+                                    weight=ft.FontWeight.W_600,
+                                    color=ft.Colors.WHITE,
+                                ),
+                                catalog_summary,
+                            ],
+                        ),
+                        refresh_button,
+                    ],
+                ),
+                movies_list,
+            ],
+        ),
+    )
+
+    form_card = ft.Container(
+        width=360,
+        padding=22,
+        border_radius=24,
+        bgcolor="#0f172a",
+        border=ft.border.all(1, "#1e293b"),
+        content=ft.Column(
+            spacing=16,
             controls=[
                 ft.Text(
-                    "Em cartaz no seu catálogo",
-                    size=17,
+                    "Novo filme",
+                    size=20,
                     weight=ft.FontWeight.W_600,
                     color=ft.Colors.WHITE,
                 ),
-                ft.ElevatedButton(
-                    "Atualizar",
-                    icon="refresh",
-                    on_click=load_movies,
-                    bgcolor=ft.Colors.GREY_700,
-                    color=ft.Colors.WHITE,
+                ft.Text(
+                    "Os dados enviados são validados pelo endpoint POST /api/movies.",
+                    size=13,
+                    color=ft.Colors.BLUE_GREY_200,
                 ),
+                title_field,
+                genre_field,
+                year_field,
+                rating_field,
+                submit_button,
+                feedback_box,
             ],
-            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-            width=420,
         ),
-        movies_list,
-        ft.Divider(height=28, color=ft.Colors.GREY_700),
+    )
 
-        # Seção: formulário
-        ft.Text(
-            "🎟️  Adicionar novo filme",
-            size=17,
-            weight=ft.FontWeight.W_600,
-            color=ft.Colors.WHITE,
-        ),
-        title_field,
-        genre_field,
-        year_field,
-        rating_field,
-        ft.ElevatedButton(
-            "Salvar filme",
-            icon="save",
-            on_click=submit_movie,
-            width=400,
-            bgcolor=ft.Colors.AMBER_700,
-            color=ft.Colors.BLACK,
-        ),
-        feedback,
+    page.add(
+        ft.Container(
+            width=960,
+            content=ft.Column(
+                spacing=20,
+                controls=[
+                    header,
+                    ft.Row(
+                        wrap=True,
+                        spacing=20,
+                        run_spacing=20,
+                        vertical_alignment=ft.CrossAxisAlignment.START,
+                        controls=[list_card, form_card],
+                    ),
+                ],
+            ),
+        )
     )
 
     load_movies()
