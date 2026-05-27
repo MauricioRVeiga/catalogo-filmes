@@ -1,13 +1,14 @@
 # Catálogo de Filmes
 
-Aplicação full stack com backend Flask, frontend em Flet e landing page estática em HTML + Tailwind CSS. O projeto simula um catálogo de filmes com listagem, consulta por ID e cadastro de novos títulos.
+Aplicação full stack com backend Flask, frontend em Flet e landing page estática em HTML + Tailwind CSS. O projeto simula um catálogo de filmes com operações completas de CRUD: listagem, consulta por ID, cadastro, atualização e remoção de títulos.
 
 ## Requisitos atendidos
 
 - Backend Flask organizado com Blueprint
-- Dois endpoints GET documentados com Swagger/Docstring
-- Um endpoint POST com validação usando Pydantic
-- Frontend Flet consumindo GET e POST com feedback ao usuário
+- Operações completas de CRUD no backend
+- Endpoints documentados com Swagger/Docstring
+- Validação de payload com Pydantic nos endpoints de criação e atualização
+- Frontend Flet consumindo leitura, criação, edição e exclusão com feedback ao usuário
 - Landing page estática com Tailwind CSS, nome, descrição e instruções de execução
 
 ## Stack
@@ -114,8 +115,10 @@ Abra `landing/index.html` no navegador.
 | GET | `/api/movies` | Lista todos os filmes cadastrados |
 | GET | `/api/movies/<id>` | Retorna os detalhes de um filme pelo ID |
 | POST | `/api/movies` | Cadastra um novo filme com validação Pydantic |
+| PUT | `/api/movies/<id>` | Atualiza um filme existente com validação Pydantic |
+| DELETE | `/api/movies/<id>` | Remove um filme do catálogo |
 
-### Exemplo de payload para POST
+### Exemplo de payload para POST e PUT
 
 ```json
 {
@@ -130,6 +133,7 @@ Abra `landing/index.html` no navegador.
 
 - O backend pode ser executado tanto pela raiz do projeto quanto pela pasta `backend`.
 - O frontend foi ajustado para a versão de Flet instalada na `.venv` do projeto.
+- A interface Flet permite criar, listar, editar e excluir filmes.
 - As respostas do backend preservam acentuação em JSON.
 - O endpoint `GET /api/movies/<id>` retorna `404` com mensagem de erro quando o filme não existe.
 
